@@ -68,11 +68,11 @@ export default class Config extends PrivateConfig {
 	static get constructFileURL() { return this.storageManager.fileURL.bind(this.storageManager); }
 
 	static get cdnPublicURL() {
-		return "https://cdn.yiff.rocks";
+		return this.isDevelopment ? `http://${this.apiHost}:${this.apiPort}/data` : "https://cdn.yiff.rocks";
 	}
 
 	static get cdnProtectedURL() {
-		return "https://protected.cdn.yiff.rocks";
+		return this.isDevelopment ? `http://${this.apiHost}:${this.apiPort}/data` : "https://protected.cdn.yiff.rocks";
 	}
 
 	static get fileTypes(): Array<[mime: string, ext: string]> {
@@ -113,20 +113,23 @@ export default class Config extends PrivateConfig {
 	static get s3Bucket() { return super.s3Bucket; }
 	static get s3ProtectedBucket() { return super.s3ProtectedBucket; }
 
+	// @TODO convert db ip addresses to hostnames when we start testing with docker
 	// db
-	static get dbHost() { return super.dbHost; }
-	static get dbPort() { return super.dbPort; }
-	static get dbUser() { return super.dbUser; }
-	static get dbPassword() { return super.dbPassword; }
-	static get dbSSL() { return super.dbSSL; }
-	static get dbDatabase() { return super.dbDatabase; }
+	static get dbHost() { return "172.19.3.5"; }
+	static get dbPort() { return 3306; }
+	static get dbUser() { return "root"; }
+	// both the local mariadb & redis instances do not have passwords, they are not publicly bound
+	// do NOT expose them to the internet without setting a password!
+	static get dbPassword() { return undefined; }
+	static get dbSSL() { return false; }
+	static get dbDatabase() { return "yiff-rocks"; }
 
 	// redis
-	static get redisHost() { return super.redisHost; }
-	static get redisPort() { return super.redisPort; }
-	static get redisUser() { return super.redisUser; }
-	static get redisPassword() { return super.redisPassword; }
-	static get redisDb() { return super.redisDb; }
+	static get redisHost() { return "172.19.3.4"; }
+	static get redisPort() { return 6379; }
+	static get redisUser() { return "default"; }
+	static get redisPassword() { return undefined; }
+	static get redisDb() { return 0; }
 
 	// image proxy
 	static get proxyURL() { return super.proxyURL; }
@@ -167,6 +170,19 @@ export default class Config extends PrivateConfig {
 		return [TagCategories.INVALID, TagCategories.ARTIST, TagCategories.COPYRIGHT, TagCategories.SPECIES, TagCategories.GENERAL, TagCategories.META, TagCategories.LORE];
 	}
 
+	static get wildcardCharacter() {
+		return "*";
+	}
+
+	static get wildcardCharacterRegex() {
+		return /\*/g;
+	}
+
+	// posts
+	static get defaultPostLimit() { return 75; }
+	static get minPostLimit() { return 1; }
+	static get maxPostLimit() { return 500; } // 250?
+
 	// users
 	static get enableEmailVerification() {
 		return !this.isDevelopment;
@@ -179,5 +195,11 @@ export default class Config extends PrivateConfig {
 	// regex
 	static get urlRegex() {
 		return /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+	}
+
+	// @TODO hostname
+	// iqdb
+	static get iqdbInstance() {
+		return "http://172.19.3.3:5588";
 	}
 }
