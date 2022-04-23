@@ -77,11 +77,11 @@ export default class Config extends PrivateConfig {
 
 	static get fileTypes(): Array<[mime: string, ext: string]> {
 		return [
-			["image/png", "png"],
-			["image/jpeg", "jpg"],
-			["image/apng", "apng"],
+			["video/webm", "webm"],
 			["image/gif", "gif"],
-			["video/webm", "webm"]
+			["image/apng", "apng"],
+			["image/png", "png"],
+			["image/jpeg", "jpg"]
 		];
 	}
 
@@ -116,9 +116,9 @@ export default class Config extends PrivateConfig {
 	// @TODO convert db ip addresses to hostnames when we start testing with docker
 	// db
 	static get dbHost() { return "172.19.3.5"; }
-	static get dbPort() { return 3306; }
-	static get dbUser() { return "root"; }
-	// both the local mariadb & redis instances do not have passwords, they are not publicly bound
+	static get dbPort() { return 5432; }
+	static get dbUser() { return "yiff-rocks"; }
+	// both the local postgres & redis instances do not have passwords, they are not publicly bound
 	// do NOT expose them to the internet without setting a password!
 	static get dbPassword() { return undefined; }
 	static get dbSSL() { return false; }
