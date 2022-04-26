@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import PrivateConfig from "./private";
 import pkg from "../../package.json";
 import S3StorageManager from "../logic/storage/S3";
 import type BaseStorageManager from "../logic/storage/Base";
 import LocalStorageManager from "../logic/storage/Local";
 import { TagCategories, TagRestrictions } from "../db/Models/Tag";
+import type { ImageSize } from "../db/Models/User";
+import { UserLevels } from "../db/Models/User";
+import type User from "../db/Models/User";
 import AWS from "aws-sdk";
 import session from "express-session";
 import { tmpdir } from "os";
@@ -179,7 +183,6 @@ export default class Config extends PrivateConfig {
 	}
 
 	// posts
-	static get defaultPostLimit() { return 75; }
 	static get minPostLimit() { return 1; }
 	static get maxPostLimit() { return 500; } // 250?
 
@@ -190,6 +193,41 @@ export default class Config extends PrivateConfig {
 
 	static enableRegistrations() {
 		return true;
+	}
+
+	// see db/Models/User.ts
+	// default: 2 (HIDE_BLACKLISTED_AVATARS), 8 (HIDE_COMMENTS), 16 (EMAIL_NOTIFICATIONS), 64 (AUTOCOMPLETE)
+	static get defaultSettings() { return 90; }
+	static get defaultUploadBase() { return 5; }
+	static get defaultBlacklist() { return ""; }
+	static get defaultImageSize(): ImageSize { return "fitv"; }
+	static get defaultPostLimit() { return 75; }
+	static get defaultCommentThreshold() { return -10; }
+	static favoriteLimit(user: User | null) {
+		if (user?.isLevelAtLeast(UserLevels.JANITOR)) return 150000;
+		else if (user?.isLevelAtLeast(UserLevels.FORMER_STAFF)) return 100000;
+		else if (user?.isLevelAtLeast(UserLevels.PRIVILEGED)) return 75000;
+		else if (user?.isLevelAtLeast(UserLevels.MEMBER)) return 50000;
+		else return 0;
+	}
+	static apiBurstLimit(user: User | null) {
+		if (user?.isLevelAtLeast(UserLevels.JANITOR)) return 120;
+		else if (user?.isLevelAtLeast(UserLevels.PRIVILEGED)) return 90;
+		else return 60;
+	}
+	static apiRegenMultiplier(user: User | null) {
+		return 1;
+	}
+	static statementTimeout(user: User | null) {
+		if (user?.isLevelAtLeast(UserLevels.JANITOR)) return 9000;
+		else if (user?.isLevelAtLeast(UserLevels.PRIVILEGED)) return 6000;
+		else return 3000;
+	}
+	static tagQueryLimit(user: User | null) {
+		if (user?.isLevelAtLeast(UserLevels.JANITOR)) return 60;
+		else if (user?.isLevelAtLeast(UserLevels.PRIVILEGED)) return 50;
+		else if (user?.isLevelAtLeast(UserLevels.MEMBER)) return 40;
+		else return 20;
 	}
 
 	// regex
